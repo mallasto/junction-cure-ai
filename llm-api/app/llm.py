@@ -5,8 +5,9 @@ import yaml
 from typing import List
 from pydantic import BaseModel, Field
 import asyncio
-import openai
 
+import openai_utils
+import embedding_utils
 import utils
 
 from dotenv import load_dotenv
@@ -15,8 +16,6 @@ load_dotenv()
 import logging
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
-
-openai_client = openai.AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
 
 def format_context_string(context, api_name):
     res = ""
@@ -131,7 +130,7 @@ def get_openai_function_api(api_name):
 
             criteria: str = Field(..., description="Name of the criteria for this feedback.")
             excerpt: str = Field(..., description="Exact excerpt from the journal entry that you provide feedback to.")
-            feedback: str = Field(..., description="Feedback on the specific criteria.")
+            feedback: str = Field(..., description="Feedback on the specific criteria. At most 20 words.")
 
         class QueryModel(BaseModel):
             "Output Schema for writing feedback for therapy journals"
@@ -152,44 +151,26 @@ def get_openai_function_api(api_name):
 
     return schema
 
-async def async_call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106", temperature=0):
-    response = await openai_client.chat.completions.create(
-        model=model,
-        temperature=temperature,
-        functions = [schema['api']],
-        messages= [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message}
-        ]
-    )
-    print("RESPONSE:", response)
-    completion = response.choices[0].message
-    result = json.loads(completion.function_call.arguments)
-    return result
+def get_analysis(request, api_names, contexts, model='openai'):
+    if model == 'embedding':
+        for context, api_name in zip(contexts, api_names):
+            if api_name == 'patient':
+                feedback = embedding_utils.score_rubric(request['entries'][-1], context, top_n=3)
+                print('FEEDBACK')
+                print(feedback)
+    else:
+        input_openai = {api_name: {} for api_name in api_names}
+        for context, api_name in zip(contexts, api_names):
+            context_str = format_context_string(context, api_name)
+            system_message = format_system_message(context_str, api_name)
+            user_message = format_user_message(request['entries'], api_name)
+            schema = get_openai_function_api(api_name)
 
+            input_openai[api_name]['system_message'] = system_message
+            input_openai[api_name]['user_message'] = user_message
+            input_openai[api_name]['schema'] = schema
 
-async def get_openai_responses(request, api_names, contexts):
-    tasks = []
-    for context, api_name in zip(contexts, api_names):
-        context_str = format_context_string(context, api_name)
-        system_message = format_system_message(context_str, api_name)
-        user_message = format_user_message(request['entries'], api_name)
-        schema = get_openai_function_api(api_name)
-
-        logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(system_message)}\n{system_message}")
-        logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(user_message)}\n{user_message}")
-
-        task = async_call_openai(
-            user_message=user_message,
-            system_message=system_message,
-            schema=schema
-        )
-        tasks.append(task)
-
-    return await asyncio.gather(*tasks)
-
-def get_analysis(request, api_names, contexts):
-    coroutines = get_openai_responses(request, api_names, contexts)
-    loop = asyncio.get_event_loop()
-    results =  loop.run_until_complete(coroutines)
-    return {f"{api_name}": result for api_name, result in zip(api_names, results)}
+        coroutines = openai_utils.get_openai_responses(input_openai)
+        loop = asyncio.get_event_loop()
+        results =  loop.run_until_complete(coroutines)
+        return {f"{api_name}": result for api_name, result in zip(api_names, results)}

@@ -7,3 +7,7 @@ yaml
 s3fs
 python-dotenv
 pyYAML
+torch
+sentence_transformers
+InstructorEmbedding
+nltk
