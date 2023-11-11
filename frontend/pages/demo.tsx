@@ -1,10 +1,10 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { postDiaryEntry, getEntries, Entry, Patient, Therapist } from '../pages/api/entry';
+import { postDiaryEntry, getEntries, Entry, Patient, Therapist, Feedback } from '../pages/api/entry';
+import dayjs from 'dayjs';
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
 
 const mockPatientFeedback: Patient = {
   "summary": "You're doing a great job of reflecting on your emotions and recognizing the need for reaching out for help. Keep exploring your feelings and consider taking small steps towards seeking support.",
@@ -139,6 +139,36 @@ const HighlightText = ({ higlights, value }: {
   return <React.Fragment>{getHighlightedText(value, higlights)}</React.Fragment>;
 };
 
+const UnderlineText = ({ feedback, value }: {
+  feedback: Feedback[];
+  value: string;
+}) => {
+  const getFeedbackText = (text:string, feedback: Feedback[]) => {
+    if (!feedback.length) return (<React.Fragment>{text}</React.Fragment>)
+    // Split on higlights and render hightlighted parts
+    const regex = new RegExp(feedback.map(i => `(${i.excerpt})`).join('|'), 'gi');
+    const parts = text.split(regex);
+    return (
+      <span>
+        {parts.map((part, index) => {
+          const feedbackItem = feedback.find((f) => f.excerpt.toLowerCase() === part.toLowerCase());
+          return feedbackItem ? (
+            <div className="tooltip" data-tip={feedbackItem.feedback}>
+              <span key={index} className="underline">
+                {part}
+              </span>
+            </div>
+          ) : (
+            <span key={index}>{part}</span>
+          )}
+        )
+          }
+      </span>
+    );
+  }
+  return <React.Fragment>{getFeedbackText(value, feedback)}</React.Fragment>;
+};
+
 
 
 export default function DemoPage() {
@@ -146,7 +176,10 @@ export default function DemoPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [therapistFeedback, setTherapistFeedback] = useState<Therapist | null>(null);
   const [currentSymptom, setCurrentSymptom] = useState<string | null>(null);
+  const [user, setUser] = useState<string | null>(null);
   useEffect(() => {
+    const user = localStorage.getItem("user-type");
+    setUser(user);
     fetchEntries();
   }, []);
 
@@ -188,7 +221,7 @@ export default function DemoPage() {
     return (
       <div className="w-3/12 pr-4">
         <h3 className="text-md font-bold">Action</h3>
-        <div className="rounded-sm shadow-lg p-4 mb-2">
+        <div className="rounded-md shadow-lg p-4 mb-2 bg-white">
           {therapistFeedback.actions}
         </div>
         <h3 className="text-md font-bold">Symptoms</h3>
@@ -217,11 +250,10 @@ export default function DemoPage() {
               const currentExcerpts = currentSymtomDetail?.excerpts.filter((excerpt: any) => String(excerpt.entry) === String(entry.id)) || [];
               highlights = currentExcerpts.map((excerpt: any) => excerpt.excerpt) || [];
             }
-            console.log('highlights', highlights);
             return (
             <div key={index} className="bg-base-100 flex border-solid border-2 mt-2 rounded-sm">
               <div className="w-4/5 m-4">
-                <h2 className="card-title">{entry.timestamp}</h2>
+                <h2 className="card-title">{dayjs(entry.timestamp).format('DD/MM/YYYY hh:mm A')}</h2>
                 <p><HighlightText value={entry.content} higlights={highlights} /></p>
               </div>
               <div className="border-l-4 border-indigo-500 w-2/5 p-2 ">
@@ -236,14 +268,16 @@ export default function DemoPage() {
     )
   }
   
-    
   return (
     <AnimatePresence>
-        <div className="navbar bg-base-100 shadow-md">
+        <div className="navbar bg-base-100 shadow-md flex justify-between sticky top-0 z-50">
           <a className="btn btn-ghost normal-case text-xl">labradoodle.ai</a>
+          <div className="">
+            <button className="btn btn-primary right-4" onClick={() => openModal(true)}>Add Entry</button>
+            <span className="ml-4">{user || 'Login'}</span>
+          </div>
         </div>
-        <div className="pl-4 pr-4 relative">
-          <button className="btn btn-primary fixed top-2 right-4" onClick={() => openModal(true)}>Add Entry</button>
+        <div className="pl-4 pr-4">
           <div className="w-full min-h-screen flex items-start mt-4">
             {therapistFeedback && <DisorderPanel currentSymptom={currentSymptom} therapistFeedback={therapistFeedback}/> }
             <EntryList entries={entries}/>

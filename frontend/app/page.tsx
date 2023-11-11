@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { gradient } from "@/components/Gradient";
 import { useEffect } from "react";
-
+import { setUser, UserType } from "@/utils";
 
 export default function Home() {
   useEffect(() => {
@@ -14,7 +14,6 @@ export default function Home() {
   return (
     <AnimatePresence>
       <div className="min-h-[100vh] sm:min-h-screen w-screen flex flex-col relative bg-[#F2F3F5] font-inter overflow-hidden">
-  
         <svg
           style={{ filter: "contrast(125%) brightness(110%)" }}
           className="fixed z-[1] w-full h-full opacity-[35%]"
@@ -134,6 +133,7 @@ export default function Home() {
               }}
             >
               <Link
+                onClick={() => setUser(UserType.Therapist)}
                 href="/demo"
                 className="group rounded-full px-4 py-2 text-[13px] font-semibold transition-all flex items-center justify-center bg-[#f5f7f9] text-[#1E2B3A] no-underline active:scale-95 scale-100 duration-75"
                 style={{
@@ -175,6 +175,7 @@ export default function Home() {
               }}
             >
               <Link
+                onClick={() => setUser(UserType.Patient)}
                 href="/demo"
                 className="group rounded-full px-4 py-2 text-[13px] font-semibold transition-all flex items-center justify-center bg-[#f5f7f9] text-[#1E2B3A] no-underline active:scale-95 scale-100 duration-75"
                 style={{
