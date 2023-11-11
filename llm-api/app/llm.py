@@ -99,14 +99,12 @@ def get_openai_function_api(api_name):
 
             criteria: str = Field(..., description="Name of the criteria for this feedback.")
             excerpts: List[str] = Field(..., description="List of excerpts from the journal entry that you provide feedback to.")
-            feedback: str = Field(..., description="Reason for why the symptom can be concluded from the excerpts")
+            feedback: str = Field(..., description="Feedback on the specific criteria.")
 
         class QueryModel(BaseModel):
             "Output Schema for writing feedback for therapy journals"
 
-            label: List[str] = Field(..., description="list of feedback labels for the therapy jorunal.")
-            excerpt: List[str] = Field(..., description="list of exerpts from the journal that you are providing feedback on.")
-            feedback: List[str] = Field(..., description="list of feedbacks you want to give the user.")
+            feedback: List[FeedbackModel]
 
         output_schema = QueryModel.schema()
         output_api = {

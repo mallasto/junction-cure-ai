@@ -27,14 +27,15 @@ def handler(event, context=None):
     user_message = llm.format_user_message(request['entries'])
     schema = llm.get_openai_function_api('symptoms')
 
-    #result = llm.call_openai(
-    #    user_message=user_message,
-    #    system_message=system_message,
-    #    schema=schema
-    #)
+    result = llm.call_openai(
+        user_message=user_message,
+        system_message=system_message,
+        schema=schema
+    )
+    
     return {
         'system_message': system_message,
         'user_message': user_message,
-        'schema': schema
+        'result': result
     }
     
