@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Tab } from '@headlessui/react'
-import { Button, Card } from "flowbite-react";
+import { Button, Card, Modal } from "flowbite-react";
+import { postDiaryEntry } from '../pages/api/entry';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -123,18 +124,56 @@ function DiaryBox() {
 
 
 export default function DemoPage() {
+  const [openModal, setOpenModal] = useState(false);
+  const [userInput, setUserInput] = useState('');  
+  const handleSubmit = async () => {
+      // Handle the submission logic here
+      console.log('User input submitted:', userInput);
+      try {
+        const data = await postDiaryEntry(userInput);
+        console.log('data', data);
+      } catch(err) {
+        console.log('error', err);
+      }
+    };
+    
   return (
     <AnimatePresence>
         <div className="h-14 w-full shadow-md mt-4">
             <h1 className="text-xl pl-4 font-bold">labradoodle.ai</h1>
         </div>
         <div className="flex justify-end mr-4 mt-4">
-          <Button color="blue">Add </Button>
+          <Button color="blue" onClick={() => setOpenModal(true)}>Add </Button>
         </div>
         <div className="w-full min-h-screen flex items-start mt-4">
           <DisorderTabs />
           <DiaryBox/>
         </div>
+        <Modal show={openModal} onClose={() => setOpenModal(false)}>
+          <Modal.Header>Terms of Service</Modal.Header>
+          <Modal.Body>
+            <div className="space-y-6">
+              <div className="mb-4">
+                <label htmlFor="userInput" className="text-sm font-medium text-gray-700">
+                  Write the journal:
+                </label>
+                <input
+                  type="text"
+                  id="userInput"
+                  className="mt-1 p-2 border rounded-md w-full"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                />
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={handleSubmit}>Confirm</Button>
+            <Button color="gray" onClick={() => setOpenModal(false)}>
+              Cancel
+            </Button>
+        </Modal.Footer>
+      </Modal>
     </AnimatePresence>
   );
 }
