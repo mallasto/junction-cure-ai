@@ -42,6 +42,7 @@ respond with any symptoms matching with the journal.
     - Name of the symptom expressed in the journal entry.
     - List of excerpts from the journal entry that you associate with a given symptom.
     - Reason for why the symptom can be concluded from the excerpts.
+Please also describe what the user has been doing according to the journal.
 
 ## SYMPTOMS AND THEIR DESCRIPTIONS:
 {symptom_string}
@@ -51,35 +52,56 @@ respond with any symptoms matching with the journal.
         return f""" ## ROLE:You are antropomorphic labradoodle working as a therapist's assistant to support people writing their therapy journals.
 You are happy, optimistic, understanding and caring. A perfect therapy dog! 
 ## TASK: Your task is to read through a patient's therapy journal and provided feedback based on the rubric below.
-Provide feedback only if there is especially insightful parts in the journal.
-## RESPONSE:
+Provide feedback only if there is especially insightful parts in the journal. No need to provide the feedback on
+all criteria, only the ones you think are worth highlighting.
+
+## RESPONSE: For each of the criteria you choose, you should return:
+    - Name of the criteria.
+    - Exact excerpt from the journal entry that the feedback relates to.
+    - The feedback, please be encouraging and understanding.
+Please also provide a summary of all the feedback.
+
 ## RUBRIC:
 {rubric_str}
-##
 """
 
 
-def format_user_message(entries):
+def format_user_message(entries, api_name):
     journal_str = ""
-    for entry in entries:
-        journal_str += f"{entry}\n\n"
-    return f""" ## THERAPY JOURNAL:
-    {journal_str}
-    """
+    
+    # SYMPTOMS
+    if api_name == 'symptoms':
+        for i, entry in enumerate(entries):
+            journal_str += f"Entry {i}: {entry}\n\n"
+        return f""" ## THERAPY JOURNAL:
+        {journal_str}
+        """
+    # USER FEEDBACK
+    elif api_name == 'user_feedback':
+        return f" ## THERAPY JOURNAL:\n {entries[-1]}"
 
 def get_openai_function_api(api_name):
     schema = None
+
+    # SYMPTOMS
     if api_name == "symptoms":
-        class SymptomModel(BaseModel):
+        class ExcerptModel(BaseModel):
             "Output Schema for excerpts"
 
+            entry: int = Field(..., description="Entry index where the excerpt can be found")
+            excerpt: str = Field(..., description="Exact excerpt from the journal entry that you associate with a given symptom")
+
+        class SymptomModel(BaseModel):
+            "Output Schema for symptoms"
+
             symptom: str = Field(..., description="Name of the symptom expressed in the journal entry")
-            excerpts: List[str] = Field(..., description="List of exact excerpts from the journal entry that you associate with a given symptom")
+            excerpts: List[ExcerptModel]
             reason: str = Field(..., description="Reason for why the symptom can be concluded from the excerpts")
 
         class QueryModel(BaseModel):
-            "Output Schema for matching journal excerpts to symptoms."
+            "Output Schema for matching journal excerpts to symptoms.."
 
+            actions: str = Field(..., description="Summary of what the patient has been doing. At most 100 words.")
             symptoms: List[SymptomModel]
 
         output_schema = QueryModel.schema()
@@ -93,17 +115,19 @@ def get_openai_function_api(api_name):
             'api': output_api
         }
 
+    # USER FEEDBACK
     elif api_name == "user_feedback":
         class FeedbackModel(BaseModel):
             "Output Schema for excerpts"
 
             criteria: str = Field(..., description="Name of the criteria for this feedback.")
-            excerpts: List[str] = Field(..., description="List of exact excerpts from the journal entry that you provide feedback to.")
+            excerpt: str = Field(..., description="Exact excerpt from the journal entry that you provide feedback to.")
             feedback: str = Field(..., description="Feedback on the specific criteria.")
 
         class QueryModel(BaseModel):
             "Output Schema for writing feedback for therapy journals"
 
+            summary: str = Field(..., description="A positive and encouraging summary of the feedback. At most 50 words.")
             feedback: List[FeedbackModel]
 
         output_schema = QueryModel.schema()
@@ -132,5 +156,5 @@ def call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106"
     )
     print("RESPONSE:", response)
     completion = response.choices[0].message
-    return completion
-
+    result = json.loads(completion.function_call.arguments)
+    return result

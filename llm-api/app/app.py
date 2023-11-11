@@ -23,9 +23,10 @@ DISORDERS = json.load(open('disorders.json'))
 def handler(event, context=None):
     request = utils.get_request(event)
 
-    system_message = llm.format_system_message(SYMPTOMS, 'symptoms')
-    user_message = llm.format_user_message(request['entries'])
-    schema = llm.get_openai_function_api('symptoms')
+    api_name = request.get('api_name', 'user_feedback')
+    system_message = llm.format_system_message(SYMPTOMS, api_name)
+    user_message = llm.format_user_message(request['entries'], api_name)
+    schema = llm.get_openai_function_api(api_name)
 
     logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(system_message)}\n{system_message}")
     logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(user_message)}\n{user_message}")
