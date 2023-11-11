@@ -24,9 +24,12 @@ async def async_call_openai(user_message, system_message, schema, model="gpt-3.5
         {"role": "user", "content": user_message}
         ]
     )
-    print("RESPONSE:", response)
-    completion = response.choices[0].message
-    result = json.loads(completion.function_call.arguments)
+    try:
+        completion = response.choices[0].message
+        result = json.loads(completion.function_call.arguments)
+    except Exception as e:
+        logger.info(f"Got exception: {e}")
+        result = {}
     return result
 
 
@@ -35,8 +38,8 @@ async def get_openai_responses(input_openai):
 
     for api_name, data in input_openai.items():
 
-        logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(data['system_message'])}\n{data['system_message']}")
-        logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(data['user_message'])}\n{data['user_message']}")
+        logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(data['system_message'])}")
+        logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(data['user_message'])}")
 
         task = async_call_openai(
             user_message=data['user_message'],
