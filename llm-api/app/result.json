@@ -1,0 +1,107 @@
+{
+  "patient": {
+    "summary": "You're doing a great job of reflecting on your emotions and recognizing the need for reaching out for help. Keep exploring your feelings and consider taking small steps towards seeking support.",
+    "feedback": [
+      {
+        "criteria": "Emotional Awareness and Expression",
+        "excerpt": "Spent the night at home, feeling a bit lonely.",
+        "feedback": "It's great to see you expressing your feelings of loneliness. Acknowledging these emotions is an important step in understanding and addressing them."
+      },
+      {
+        "criteria": "Self-Reflection and Insight",
+        "excerpt": "I keep telling myself I\u2019ll reach out for help, talk to someone about how I\u2019ve been feeling, but I keep putting it off.",
+        "feedback": "Your insight into the need for reaching out for help is commendable. It's okay to take small steps, and acknowledging the need for support is a positive move towards self-care."
+      },
+      {
+        "criteria": "Overall Engagement and Effort",
+        "excerpt": "Maybe next week will be better.",
+        "feedback": "Your dedication to journaling and the hope for a better week ahead is admirable. Keep engaging with the process and remember that each entry is a step towards self-discovery and growth."
+      }
+    ]
+  },
+  "therapist": {
+    "actions": "The patient has been experiencing a persistent sense of feeling overwhelmed, low energy, difficulty concentrating, and a lack of appetite. They have also been avoiding social interactions and feeling disconnected from others. The patient has been struggling with negative thoughts and has been putting off seeking help.",
+    "symptoms": [
+      {
+        "symptom": "Apathy",
+        "excerpts": [
+          {
+            "entry": 0,
+            "excerpt": "couldn't shake off this lingering feeling of being overwhelmed"
+          },
+          {
+            "entry": 1,
+            "excerpt": "I\u2019ve been finding it hard to concentrate lately, my mind keeps drifting off"
+          },
+          {
+            "entry": 2,
+            "excerpt": "I keep wondering why I can't just be happy when things are going fine"
+          },
+          {
+            "entry": 3,
+            "excerpt": "I sometimes feel so disconnected from them"
+          }
+        ],
+        "reason": "The patient expresses a lack of interest, enthusiasm, or concern about things that others find moving or exciting, as evidenced by feeling overwhelmed, having difficulty concentrating, and feeling disconnected from others."
+      },
+      {
+        "symptom": "Changes in Appetite",
+        "excerpts": [
+          {
+            "entry": 2,
+            "excerpt": "Made a simple dinner, but didn\u2019t have much appetite"
+          }
+        ],
+        "reason": "The patient experiences a significant fluctuation in eating habits, as evidenced by not having much appetite despite making dinner."
+      },
+      {
+        "symptom": "Difficulty Concentrating",
+        "excerpts": [
+          {
+            "entry": 1,
+            "excerpt": "I\u2019ve been finding it hard to concentrate lately, my mind keeps drifting off"
+          },
+          {
+            "entry": 3,
+            "excerpt": "I tried reading, but couldn't focus"
+          }
+        ],
+        "reason": "The patient struggles to focus on tasks or maintain attention, as evidenced by finding it hard to concentrate and being unable to focus while reading."
+      },
+      {
+        "symptom": "Social Withdrawal",
+        "excerpts": [
+          {
+            "entry": 2,
+            "excerpt": "I should probably try to be more social, but it feels like too much effort"
+          },
+          {
+            "entry": 4,
+            "excerpt": "I just didn't feel up to pretending to be cheerful"
+          }
+        ],
+        "reason": "The patient chooses not to engage in social activities and prefers to be alone, as evidenced by feeling that being more social requires too much effort and not feeling up to pretending to be cheerful."
+      },
+      {
+        "symptom": "Negative Symptoms like Diminished Emotional Expression",
+        "excerpts": [
+          {
+            "entry": 3,
+            "excerpt": "I sometimes feel so disconnected from them"
+          }
+        ],
+        "reason": "The patient experiences a reduction in emotional expression or motivation, as evidenced by feeling disconnected from others."
+      },
+      {
+        "symptom": "Excessive Worry",
+        "excerpts": [
+          {
+            "entry": 3,
+            "excerpt": "My thoughts kept wandering to negative things, like past mistakes and worries about the future"
+          }
+        ],
+        "reason": "The patient exhibits an extreme level of worry about various things, as evidenced by their thoughts wandering to negative things and worries about the future."
+      }
+    ]
+  }
+}
