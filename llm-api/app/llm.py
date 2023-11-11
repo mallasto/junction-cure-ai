@@ -153,11 +153,15 @@ def get_openai_function_api(api_name):
 
 def get_analysis(request, api_names, contexts, model='openai'):
     if model == 'embedding':
+        results = {}
         for context, api_name in zip(contexts, api_names):
             if api_name == 'patient':
-                feedback = embedding_utils.score_rubric(request['entries'][-1], context, top_n=3)
-                print('FEEDBACK')
-                print(feedback)
+                results[api_name] =  embedding_utils.score_rubric(request['entries'][-1], context, top_n=3)
+            elif api_name == 'therapist':
+                results[api_name] =  embedding_utils.score_symptoms(request['entries'], context, top_n=3)
+        print('RESULTS:')
+        print(results)
+        return results
     else:
         input_openai = {api_name: {} for api_name in api_names}
         for context, api_name in zip(contexts, api_names):

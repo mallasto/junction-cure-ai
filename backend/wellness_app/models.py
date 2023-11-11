@@ -7,5 +7,12 @@ class JournalEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     
+class PatientFeedback(models.Model):
+    patient_summary = models.TextField()
+    
+class TherepistFeedback(models.Model):
+    therepist_summary = models.TextField()
+    
+    
 class Meta:
     app_label = 'wellness_app'
