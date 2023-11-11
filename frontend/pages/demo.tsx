@@ -1,179 +1,275 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { Tab } from '@headlessui/react'
-import { Button, Card, Modal } from "flowbite-react";
-import { postDiaryEntry } from '../pages/api/entry';
+import { postDiaryEntry, getEntries, Entry, Patient, Therapist } from '../pages/api/entry';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const journals = [{
-  date: '2021-10-01',
-  content: 'Today was just okay. Work was the usual mix of meetings and deadlines. Managed to get most of my tasks done, but couldn\'t shake off this lingering feeling of being overwhelmed, even by small things. Dinner was nice, made spaghetti, my favorite, but it didn\'t taste as good as it usually does. Feeling pretty tired, although I didn\'t do much. Going to try and get some sleep, hopefully will feel more energized tomorrow.',
-}, {
-  date: '2021-10-02',
-  content: 'Struggled to get out of bed this morning, even though I slept a decent amount. The weather was gloomy, which didn’t help my mood. Work was fine, nothing special. I’ve been finding it hard to concentrate lately, my mind keeps drifting off. In the evening, I decided to skip my usual jog. Just wasn\'t feeling up to it. Ended up watching some TV, but I can\'t even remember what I watched.',
-}]
+const mockPatientFeedback: Patient = {
+  "summary": "You're doing a great job of reflecting on your emotions and recognizing the need for reaching out for help. Keep exploring your feelings and consider taking small steps towards seeking support.",
+  "feedback": [
+    {
+      "criteria": "Emotional Awareness and Expression",
+      "excerpt": "Spent the night at home, feeling a bit lonely.",
+      "feedback": "It's great to see you expressing your feelings of loneliness. Acknowledging these emotions is an important step in understanding and addressing them."
+    },
+    {
+      "criteria": "Self-Reflection and Insight",
+      "excerpt": "I keep telling myself I\u2019ll reach out for help, talk to someone about how I\u2019ve been feeling, but I keep putting it off.",
+      "feedback": "Your insight into the need for reaching out for help is commendable. It's okay to take small steps, and acknowledging the need for support is a positive move towards self-care."
+    },
+    {
+      "criteria": "Overall Engagement and Effort",
+      "excerpt": "Maybe next week will be better.",
+      "feedback": "Your dedication to journaling and the hope for a better week ahead is admirable. Keep engaging with the process and remember that each entry is a step towards self-discovery and growth."
+    }
+  ]
+}
 
+const mockTherapistFeedback: Therapist =  {
+  "actions": "The patient has been experiencing a persistent sense of feeling overwhelmed, low energy, difficulty concentrating, and a lack of appetite. They have also been avoiding social interactions and feeling disconnected from others. The patient has been struggling with negative thoughts and has been putting off seeking help.",
+  "symptoms": [
+    {
+      "symptom": "Apathy",
+      "excerpts": [
+        {
+          "entry": 4,
+          "excerpt": "A"
+        },
+        {
+          "entry": 1,
+          "excerpt": "A"
+        },
+        {
+          "entry": 2,
+          "excerpt": "A"
+        },
+        {
+          "entry": 3,
+          "excerpt": "A"
+        }
+      ],
+      "reason": "The patient expresses a lack of interest, enthusiasm, or concern about things that others find moving or exciting, as evidenced by feeling overwhelmed, having difficulty concentrating, and feeling disconnected from others."
+    },
+    {
+      "symptom": "Changes in Appetite",
+      "excerpts": [
+        {
+          "entry": 2,
+          "excerpt": "C"
+        }
+      ],
+      "reason": "The patient experiences a significant fluctuation in eating habits, as evidenced by not having much appetite despite making dinner."
+    },
+    {
+      "symptom": "Difficulty Concentrating",
+      "excerpts": [
+        {
+          "entry": 1,
+          "excerpt": "D"
+        },
+        {
+          "entry": 3,
+          "excerpt": "D"
+        }
+      ],
+      "reason": "The patient struggles to focus on tasks or maintain attention, as evidenced by finding it hard to concentrate and being unable to focus while reading."
+    },
+    {
+      "symptom": "Social Withdrawal",
+      "excerpts": [
+        {
+          "entry": 2,
+          "excerpt": "I should probably try to be more social, but it feels like too much effort"
+        },
+        {
+          "entry": 4,
+          "excerpt": "I just didn't feel up to pretending to be cheerful"
+        }
+      ],
+      "reason": "The patient chooses not to engage in social activities and prefers to be alone, as evidenced by feeling that being more social requires too much effort and not feeling up to pretending to be cheerful."
+    },
+    {
+      "symptom": "Negative Symptoms like Diminished Emotional Expression",
+      "excerpts": [
+        {
+          "entry": 3,
+          "excerpt": "I sometimes feel so disconnected from them"
+        }
+      ],
+      "reason": "The patient experiences a reduction in emotional expression or motivation, as evidenced by feeling disconnected from others."
+    },
+    {
+      "symptom": "Excessive Worry",
+      "excerpts": [
+        {
+          "entry": 3,
+          "excerpt": "My thoughts kept wandering to negative things, like past mistakes and worries about the future"
+        }
+      ],
+      "reason": "The patient exhibits an extreme level of worry about various things, as evidenced by their thoughts wandering to negative things and worries about the future."
+    }
+  ],
+}
 
-
-const HighlightText = ({ higlight, value }: {
-  higlight: string;
+const HighlightText = ({ higlights, value }: {
+  higlights: string[];
   value: string;
 }) => {
-  const getHighlightedText = (text:string, higlight: string) => {
-    // Split text on higlight term, include term itself into parts, ignore case
-    var parts = text.split(new RegExp(`(${higlight})`, "gi"));
-    return parts.map((part, index) => {
-      console.log('index', index)
-      return (
-      <React.Fragment key={index}>
-        {part.toLowerCase() === higlight.toLowerCase() ? (
-          <b style={{ backgroundColor: "#e8bb49" }}>{part}</b>
-        ) : (
-          part
+  const getHighlightedText = (text:string, higlights: string[]) => {
+    if (!higlights.length) return (<React.Fragment>{text}</React.Fragment>)
+    // Split on higlights and render hightlighted parts
+    const regex = new RegExp(higlights.map(i => `(${i})`).join('|'), 'gi');
+    const parts = text.split(regex);
+    return (
+      <span>
+        {parts.map((part, index) =>
+          higlights.find((highlight) => highlight.toLowerCase() === part.toLowerCase()) ? (
+            <span key={index} className="bg-yellow-200">
+              {part}
+            </span>
+          ) : (
+            <span key={index}>{part}</span>
+          )
         )}
-      </React.Fragment>
-      )})
+      </span>
+    );
   }
-  return <React.Fragment>{getHighlightedText(value, higlight)}</React.Fragment>;
+  return <React.Fragment>{getHighlightedText(value, higlights)}</React.Fragment>;
 };
 
-function UserFeedback() {
-  return (
-    <div className="shadow-inner mr-4">
-      <Card href="#" className="max-w-sm">
-        <p className="font-normal text-gray-700 dark:text-gray-400">
-          Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.
-        </p>
-      </Card>
-    </div>
-  )
-}
-
-function DisorderTabs() {
-  let [disorders] = useState({
-    Depressive: {
-        id: 1,
-        entries: ['Does drinking coffee make you smarter?', 'How to make the perfect pour over'],
-        date: '5h ago',
-        reason: 'Depressive',
-    },
-    Anxiety: {
-      id: 1,
-      entries: ['Does drinking coffee make you smarter?', 'How to make the perfect pour over'],
-      date: '5h ago',
-      reason: 'Depressive',
-    },
-    Stress: {
-      id: 1,
-      entries: ['Does drinking coffee make you smarter?', 'How to make the perfect pour over'],
-      date: '5h ago',
-      reason: 'Depressive',
-    },
-  })
-  return (
-    <div className="w-140 max-w-md pr-4">
-        <Tab.Group vertical >
-          <Tab.List className="w-64 space-x-1 rounded-xl bg-blue-900/20 p-1">
-            {Object.keys(disorders).map((disorder) => (
-              <Tab
-                key={disorder}
-                className={({ selected }) =>
-                  classNames(
-                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700',
-                    'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                    selected
-                      ? 'bg-white shadow'
-                      : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
-                  )
-                }
-              >
-                {disorder}
-              </Tab>
-            ))}
-          </Tab.List>
-        </Tab.Group>
-    </div>
-  )
-}
-
-function DiaryBox() {
-  return (
-    <div className="flex-auto">
-      <div className="flex flex-col">
-        {journals.map((journal, index) => (
-          <div key={index} className="flex">
-            <Card className="max-w mr-4 mb-4 pt-0">
-              <div className="flex justify-between items-center">
-                  <span className="font-bold text-gray-600 ">{journal.date}</span>
-                  <a className="px-2 py-1 bg-gray-600 text-gray-100 font-bold rounded hover:bg-gray-500" href="#">Edit</a>
-              </div>
-              <div className="mt-2">
-                  <p className="mt-2 text-gray-600"><HighlightText value={journal.content} higlight={'and'} /></p>
-              </div>
-            </Card>
-            <UserFeedback/>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 
 export default function DemoPage() {
-  const [openModal, setOpenModal] = useState(false);
   const [userInput, setUserInput] = useState('');  
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [therapistFeedback, setTherapistFeedback] = useState<Therapist | null>(null);
+  const [currentSymptom, setCurrentSymptom] = useState<string | null>(null);
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  const openModal = () => {
+    document.getElementById('add_modal')?.showModal();
+  }
+
+  const closeModal = () => {
+    document.getElementById('add_modal')?.close();
+  }
+  const fetchEntries = async () => {
+    try {
+      const data = await getEntries();
+      setTherapistFeedback(mockTherapistFeedback);
+      const orderEntries = data.entries.reverse().map((entry: Entry) => {
+        entry.patient = mockPatientFeedback;
+        return entry
+      });
+      setEntries(orderEntries);
+    } catch(err) {
+      throw err;
+    }
+  }
   const handleSubmit = async () => {
       // Handle the submission logic here
-      console.log('User input submitted:', userInput);
       try {
         const data = await postDiaryEntry(userInput);
-        console.log('data', data);
+        await fetchEntries();
+        closeModal()
+        setUserInput('');
       } catch(err) {
         console.log('error', err);
       }
-    };
+  };
+  const handleClickSymptom = (symptom: string) => {
+    setCurrentSymptom(symptom);
+  }
+  const DisorderPanel = ({therapistFeedback, currentSymptom}: {therapistFeedback: Therapist, currentSymptom: string | null}) =>  {
+    return (
+      <div className="w-3/12 pr-4">
+        <h3 className="text-md font-bold">Action</h3>
+        <div className="rounded-sm shadow-lg p-4 mb-2">
+          {therapistFeedback.actions}
+        </div>
+        <h3 className="text-md font-bold">Symptoms</h3>
+        {therapistFeedback.symptoms.map((data, index) => (
+          <div className="collapse collapse-arrow bg-base-200 mt-4" key={index}>
+            <input type="radio" name="my-accordion-2" checked={currentSymptom === data.symptom } onChange={() => handleClickSymptom(data.symptom)} /> 
+            <div className="collapse-title text-md font-medium" >
+              {data.symptom}
+            </div>
+            <div className="collapse-content"> 
+              <p>{data.reason}</p>
+            </div>
+          </div>)
+        )}
+      </div>
+    )
+  }
+
+  const EntryList = ({entries}: {entries: Entry[]}) => {
+    return (
+      <div className="w-9/12">
+          {entries.map((entry: Entry, index) => {
+            let highlights: string[] = [];
+            if (currentSymptom) {
+              const currentSymtomDetail = therapistFeedback?.symptoms.find((symptom: any) => symptom.symptom === currentSymptom)
+              const currentExcerpts = currentSymtomDetail?.excerpts.filter((excerpt: any) => String(excerpt.entry) === String(entry.id)) || [];
+              highlights = currentExcerpts.map((excerpt: any) => excerpt.excerpt) || [];
+            }
+            console.log('highlights', highlights);
+            return (
+            <div key={index} className="bg-base-100 flex border-solid border-2 mt-2 rounded-sm">
+              <div className="w-4/5 m-4">
+                <h2 className="card-title">{entry.timestamp}</h2>
+                <p><HighlightText value={entry.content} higlights={highlights} /></p>
+              </div>
+              <div className="border-l-4 border-indigo-500 w-2/5 p-2 ">
+                <p className="font-normal w-full text-md">
+                  {entry.patient.summary}
+                </p>
+              </div>
+            </div>
+            )}
+          )}
+      </div>
+    )
+  }
+  
     
   return (
     <AnimatePresence>
-        <div className="h-14 w-full shadow-md mt-4">
-            <h1 className="text-xl pl-4 font-bold">labradoodle.ai</h1>
+        <div className="navbar bg-base-100 shadow-md">
+          <a className="btn btn-ghost normal-case text-xl">labradoodle.ai</a>
         </div>
-        <div className="flex justify-end mr-4 mt-4">
-          <Button color="blue" onClick={() => setOpenModal(true)}>Add </Button>
+        <div className="pl-4 pr-4 relative">
+          <button className="btn btn-primary fixed top-2 right-4" onClick={() => openModal(true)}>Add Entry</button>
+          <div className="w-full min-h-screen flex items-start mt-4">
+            {therapistFeedback && <DisorderPanel currentSymptom={currentSymptom} therapistFeedback={therapistFeedback}/> }
+            <EntryList entries={entries}/>
+          </div>
         </div>
-        <div className="w-full min-h-screen flex items-start mt-4">
-          <DisorderTabs />
-          <DiaryBox/>
-        </div>
-        <Modal show={openModal} onClose={() => setOpenModal(false)}>
-          <Modal.Header>Terms of Service</Modal.Header>
-          <Modal.Body>
+        <dialog id="add_modal" className="modal" modal-open>
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+            <h3 className="font-bold text-lg">Add new journal</h3>
             <div className="space-y-6">
               <div className="mb-4">
-                <label htmlFor="userInput" className="text-sm font-medium text-gray-700">
-                  Write the journal:
-                </label>
-                <input
-                  type="text"
-                  id="userInput"
-                  className="mt-1 p-2 border rounded-md w-full"
+                <textarea 
+                  rows={6}
+                  className="textarea textarea-bordered w-full" 
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                />
+                  placeholder="Bio"></textarea>
+              </div>
+              <div className="flex justify-end">
+                <button className="btn btn-primary" onClick={handleSubmit}>Submit</button>
               </div>
             </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={handleSubmit}>Confirm</Button>
-            <Button color="gray" onClick={() => setOpenModal(false)}>
-              Cancel
-            </Button>
-        </Modal.Footer>
-      </Modal>
+          </div>
+        </dialog>
     </AnimatePresence>
   );
 }
