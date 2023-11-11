@@ -3,11 +3,15 @@ import nltk
 from nltk.tokenize import sent_tokenize
 import pickle
 import numpy as np
+from langchain.embeddings import HuggingFaceInstructEmbeddings
 
 # Ensure the necessary NLTK tokenizers are downloaded
-nltk.download('punkt')
+nltk.data.path.append("/tmp")
+nltk.download('punkt', download_dir='/tmp')
 
-model = INSTRUCTOR('hkunlp/instructor-base')
+model = HuggingFaceInstructEmbeddings(model_name='models/instructor-base')
+#model = INSTRUCTOR('models/instructor-base')
+
 
 def split_into_sentences(text):
     return sent_tokenize(text)
@@ -16,15 +20,13 @@ def flatten_list(lst):
     return [item for sublist in lst for item in sublist]
 
 
-def embed_query(query, instruction):
-    emb =  model.encode([[instruction, query]])
+def embed_query(query):
+    emb =  np.array(model.embed_query(query)).reshape(1,-1)
     emb /= np.linalg.norm(emb, axis=1, keepdims=True)
-    return emb.reshape(1,-1)
+    return emb
 
-# pairs = [(instruction, sentence) for sentence in split_into_sentences(entry)]
-def embed_sentences(sentences, instruction):
-    pairs = [[instruction, sentence] for sentence in sentences]
-    emb = model.encode(pairs)
+def embed_sentences(sentences):
+    emb = np.array([model.embed_query(sentence) for sentence in sentences]).squeeze()
     emb /= np.linalg.norm(emb, axis=1, keepdims=True)
     return emb
 
@@ -33,7 +35,6 @@ def score_symptoms(entries, symptoms, top_n):
     entry_embeddings = [
         embed_sentences(
             sentences=sentences,
-            instruction="Represent the Science sentence:"
         ) for sentences in entry_sentences
     ]
 
@@ -64,8 +65,10 @@ def score_symptoms(entries, symptoms, top_n):
             "excerpt": entry_sentences[argmax_entry][argmax_entry_k]
         }
         results.append(result)
-    
-    return sorted(results, key=lambda x: x['score'])[-top_n:]
+    results = sorted(results, key=lambda x: x['score'])[-top_n:]
+    for result in results:
+        result.pop('score')
+    return results
         
 
 
@@ -73,7 +76,6 @@ def score_rubric(entry, rubric, top_n=3):
     entry_sentences = split_into_sentences(entry)
     entry_embedding = embed_sentences(
         sentences=entry_sentences,
-        instruction="Represent the Science sentence:"
     )
 
     feedbacks = []
@@ -87,6 +89,9 @@ def score_rubric(entry, rubric, top_n=3):
             "feedback": '',
             'score': float(max_score)
         })
-    return sorted(feedbacks, key=lambda fb: fb['score'])[-top_n:]
+    results = sorted(feedbacks, key=lambda fb: fb['score'])[-top_n:]
+    for result in results:
+        result.pop('score')
+    return results
         
 

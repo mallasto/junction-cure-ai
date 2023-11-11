@@ -10,3 +10,4 @@ pyYAML
 sentence-transformers
 InstructorEmbedding
 nltk
+langchain
