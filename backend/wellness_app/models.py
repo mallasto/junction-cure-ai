@@ -7,11 +7,12 @@ class JournalEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     
-class PatientFeedback(models.Model):
+class LLMResponse(models.Model):
+    entry = models.OneToOneField(JournalEntry, on_delete=models.CASCADE)
     patient_summary = models.TextField()
-    
-class TherepistFeedback(models.Model):
-    therepist_summary = models.TextField()
+    patient_feedback = models.JSONField()
+    therapist_summary = models.TextField()
+    therapist_feedback = models.JSONField()
     
     
 class Meta:
