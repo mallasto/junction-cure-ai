@@ -2,116 +2,10 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { postDiaryEntry, deleteEntry, getEntries, Entry, Patient, Therapist, Feedback } from '../pages/api/entry';
+import { postDiaryEntry, deleteEntry, getEntries, Entry, TherapistResult, Patient, TherapistFeedback } from '../pages/api/entry';
 import dayjs from 'dayjs';
 import { UserType } from "@/utils";
 
-const mockPatientFeedback: Patient = {
-  "summary": "You're doing a great job of reflecting on your emotions and recognizing the need for reaching out for help. Keep exploring your feelings and consider taking small steps towards seeking support.",
-  "feedback": [
-    {
-      "criteria": "Emotional Awareness and Expression",
-      "excerpt": "Spent the night at home, feeling a bit lonely.",
-      "feedback": "It's great to see you expressing your feelings of loneliness. Acknowledging these emotions is an important step in understanding and addressing them."
-    },
-    {
-      "criteria": "Self-Reflection and Insight",
-      "excerpt": "I keep telling myself I\u2019ll reach out for help, talk to someone about how I\u2019ve been feeling, but I keep putting it off.",
-      "feedback": "Your insight into the need for reaching out for help is commendable. It's okay to take small steps, and acknowledging the need for support is a positive move towards self-care."
-    },
-    {
-      "criteria": "Overall Engagement and Effort",
-      "excerpt": "Maybe next week will be better.",
-      "feedback": "Your dedication to journaling and the hope for a better week ahead is admirable. Keep engaging with the process and remember that each entry is a step towards self-discovery and growth."
-    }
-  ]
-}
-
-const mockTherapistFeedback: Therapist =  {
-  "actions": "The patient has been experiencing a persistent sense of feeling overwhelmed, low energy, difficulty concentrating, and a lack of appetite. They have also been avoiding social interactions and feeling disconnected from others. The patient has been struggling with negative thoughts and has been putting off seeking help.",
-  "symptoms": [
-    {
-      "symptom": "Apathy",
-      "excerpts": [
-        {
-          "entry": 4,
-          "excerpt": "A"
-        },
-        {
-          "entry": 1,
-          "excerpt": "A"
-        },
-        {
-          "entry": 2,
-          "excerpt": "A"
-        },
-        {
-          "entry": 3,
-          "excerpt": "A"
-        }
-      ],
-      "reason": "The patient expresses a lack of interest, enthusiasm, or concern about things that others find moving or exciting, as evidenced by feeling overwhelmed, having difficulty concentrating, and feeling disconnected from others."
-    },
-    {
-      "symptom": "Changes in Appetite",
-      "excerpts": [
-        {
-          "entry": 2,
-          "excerpt": "C"
-        }
-      ],
-      "reason": "The patient experiences a significant fluctuation in eating habits, as evidenced by not having much appetite despite making dinner."
-    },
-    {
-      "symptom": "Difficulty Concentrating",
-      "excerpts": [
-        {
-          "entry": 1,
-          "excerpt": "D"
-        },
-        {
-          "entry": 3,
-          "excerpt": "D"
-        }
-      ],
-      "reason": "The patient struggles to focus on tasks or maintain attention, as evidenced by finding it hard to concentrate and being unable to focus while reading."
-    },
-    {
-      "symptom": "Social Withdrawal",
-      "excerpts": [
-        {
-          "entry": 2,
-          "excerpt": "I should probably try to be more social, but it feels like too much effort"
-        },
-        {
-          "entry": 4,
-          "excerpt": "I just didn't feel up to pretending to be cheerful"
-        }
-      ],
-      "reason": "The patient chooses not to engage in social activities and prefers to be alone, as evidenced by feeling that being more social requires too much effort and not feeling up to pretending to be cheerful."
-    },
-    {
-      "symptom": "Negative Symptoms like Diminished Emotional Expression",
-      "excerpts": [
-        {
-          "entry": 3,
-          "excerpt": "I sometimes feel so disconnected from them"
-        }
-      ],
-      "reason": "The patient experiences a reduction in emotional expression or motivation, as evidenced by feeling disconnected from others."
-    },
-    {
-      "symptom": "Excessive Worry",
-      "excerpts": [
-        {
-          "entry": 3,
-          "excerpt": "My thoughts kept wandering to negative things, like past mistakes and worries about the future"
-        }
-      ],
-      "reason": "The patient exhibits an extreme level of worry about various things, as evidenced by their thoughts wandering to negative things and worries about the future."
-    }
-  ],
-}
 
 const HighlightText = ({ higlights, value }: {
   higlights: string[];
@@ -139,44 +33,45 @@ const HighlightText = ({ higlights, value }: {
   return <React.Fragment>{getHighlightedText(value, higlights)}</React.Fragment>;
 };
 
-const UnderlineText = ({ feedback, value }: {
-  feedback: Feedback[];
-  value: string;
-}) => {
-  const getFeedbackText = (text:string, feedback: Feedback[]) => {
-    if (!feedback.length) return (<React.Fragment>{text}</React.Fragment>)
-    // Split on higlights and render hightlighted parts
-    const regex = new RegExp(feedback.map(i => `(${i.excerpt})`).join('|'), 'gi');
-    const parts = text.split(regex);
-    return (
-      <span>
-        {parts.map((part, index) => {
-          const feedbackItem = feedback.find((f) => f.excerpt.toLowerCase() === part.toLowerCase());
-          return feedbackItem ? (
-            <div className="tooltip" data-tip={feedbackItem.feedback}>
-              <span key={index} className="underline">
-                {part}
-              </span>
-            </div>
-          ) : (
-            <span key={index}>{part}</span>
-          )}
-        )
-          }
-      </span>
-    );
-  }
-  return <React.Fragment>{getFeedbackText(value, feedback)}</React.Fragment>;
-};
+// const UnderlineText = ({ feedback, value }: {
+//   feedback: Feedback[];
+//   value: string;
+// }) => {
+//   const getFeedbackText = (text:string, feedback: Feedback[]) => {
+//     if (!feedback.length) return (<React.Fragment>{text}</React.Fragment>)
+//     // Split on higlights and render hightlighted parts
+//     const regex = new RegExp(feedback.map(i => `(${i.excerpt})`).join('|'), 'gi');
+//     const parts = text.split(regex);
+//     return (
+//       <span>
+//         {parts.map((part, index) => {
+//           const feedbackItem = feedback.find((f) => f.excerpt.toLowerCase() === part.toLowerCase());
+//           return feedbackItem ? (
+//             <div className="tooltip" data-tip={feedbackItem.feedback}>
+//               <span key={index} className="underline">
+//                 {part}
+//               </span>
+//             </div>
+//           ) : (
+//             <span key={index}>{part}</span>
+//           )}
+//         )
+//           }
+//       </span>
+//     );
+//   }
+//   return <React.Fragment>{getFeedbackText(value, feedback)}</React.Fragment>;
+// };
 
 
 
 export default function DemoPage() {
   const [userInput, setUserInput] = useState('');  
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [therapistFeedback, setTherapistFeedback] = useState<Therapist | null>(null);
+  const [therapistFeedback, setTherapistFeedback] = useState<TherapistResult | null>(null);
   const [currentSymptom, setCurrentSymptom] = useState<string | null>(null);
   const [user, setUser] = useState<string | null>(null);
+  
   useEffect(() => {
     const user = localStorage.getItem("user-type");
     setUser(user);
@@ -193,10 +88,30 @@ export default function DemoPage() {
   const fetchEntries = async () => {
     try {
       const data = await getEntries();
-      setTherapistFeedback(mockTherapistFeedback);
       const orderEntries = data.entries.reverse().map((entry: Entry) => {
-        entry.patient = mockPatientFeedback;
+        if (entry['patient summary']) {
+          entry.patient_summary = entry['patient summary'];
+          delete entry['patient summary'];
+        }
+        if (entry['patient feedback']) {
+          entry.patient_feedback = entry['patient feedback'];
+          delete entry['patient feedback'];
+        }
+        if (entry['therapist summary']) {
+          entry.therapist_summary = entry['therapist summary'];
+          delete entry['therapist summary'];
+        }
+        if (entry['therapist feedback']) {
+          entry.therapist_feedback = entry['therapist feedback'];
+          delete entry['therapist feedback'];
+        }
         return entry
+      });
+      if (orderEntries.length === 0) return;
+      const lastestEntry = orderEntries[orderEntries.length - 1];
+      setTherapistFeedback({
+        actions: lastestEntry.therapist_summary,
+        symptoms: lastestEntry.therapist_feedback,
       });
       setEntries(orderEntries);
     } catch(err) {
@@ -226,7 +141,7 @@ export default function DemoPage() {
       console.log('error', err);
     }
   } 
-  const DisorderPanel = ({therapistFeedback, currentSymptom}: {therapistFeedback: Therapist| null, currentSymptom: string | null}) =>  {
+  const DisorderPanel = ({therapistFeedback, currentSymptom}: {therapistFeedback: TherapistResult | null, currentSymptom: string | null}) =>  {
     if (!therapistFeedback || user !== UserType.Therapist) return <div className="w-3/12 pr-4" />
     return (
       <div className="w-3/12 pr-4">
@@ -262,8 +177,8 @@ export default function DemoPage() {
               highlights = currentExcerpts.map((excerpt: any) => excerpt.excerpt) || [];
             }
             return (
-            <div key={index} className="bg-base-100 flex border-solid border-2 mt-2 rounded-sm">
-              <div className="w-4/5 m-4">
+            <div key={index} className="flex border-solid border-2 rounded-sm">
+              <div className="w-4/5 mt-4 mr-4 bg-base-100 p-2">
                 <div className="flex justify-between">
                 <h2 className="card-title">{dayjs(entry.timestamp).format('DD/MM/YYYY hh:mm A')}</h2>
                 { isPatient && <div className="dropdown">
@@ -280,11 +195,12 @@ export default function DemoPage() {
                 </div>
                 <p><HighlightText value={entry.content} higlights={highlights} /></p>
               </div>
-              <div className="border-l-4 border-indigo-500 w-2/5 p-2 ">
+              {entry.patient_summary ? <div className="self-start border-l-4 border-indigo-500 w-2/5 p-2 mt-4 bg-base-100 ">
                 <p className="font-normal w-full text-md">
-                  {entry.patient.summary}
-                </p>
-              </div>
+                  {entry.patient_summary}
+                </p> 
+              </div> : <div className="w-2/5 p-2 " />
+              }
             </div>
             )}
           )}

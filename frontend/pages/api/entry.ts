@@ -35,21 +35,40 @@ export async function getEntries() {
 
 export interface EntryAPIResponse {
   entries: Entry[];
-  therapist: Therapist;
 }
 
 export interface Entry {
   content: string;
   id: string;
   timestamp: string;
-  patient: Patient;
+  patient_summary: string
+  patient_feedback: PatientFeedback[];
+  'patient feedback'?: PatientFeedback[];
+  'patient summary'?: string;
+  'therapist feedback'?: TherapistFeedback[];
+  'therapist summary'?: string;
+  therapist_summary: string
+  therapist_feedback: TherapistFeedback[]
+}
+
+export interface PatientFeedback {
+  feedback: string
+  criteria: string
+  excerpt: string
+}
+
+export interface TherapistFeedback {
+  reason: string
+  symptom: string
+  excerpts: Excerpt[]
+}
+
+export interface Excerpt {
+  entry: number
+  excerpt: string
 }
 
 
- export interface Result {
-  patient: Patient
-  therapist: Therapist
-}
 
 export interface Patient {
   summary: string
@@ -62,7 +81,7 @@ export interface Feedback {
   feedback: string
 }
 
-export interface Therapist {
+export interface TherapistR {
   actions: string
   symptoms: Symptom[]
 }
