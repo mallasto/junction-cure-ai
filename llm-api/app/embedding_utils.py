@@ -9,7 +9,10 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 nltk.data.path.append("/tmp")
 nltk.download('punkt', download_dir='/tmp')
 
-model = HuggingFaceInstructEmbeddings(model_name='models/instructor-base')
+try:
+    model = HuggingFaceInstructEmbeddings(model_name='models/instructor-base')
+except:
+    model = HuggingFaceInstructEmbeddings(model_name='/var/task/models/instructor-base')
 #model = INSTRUCTOR('models/instructor-base')
 
 
