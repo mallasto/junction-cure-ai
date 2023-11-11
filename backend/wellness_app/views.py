@@ -7,6 +7,7 @@ from .models import JournalEntry
 import json
 from django.core.serializers import serialize
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 
 @csrf_exempt
 def process_journal_entry(request):
@@ -27,26 +28,31 @@ def process_journal_entry(request):
                 'success': 'Journal entry saved successfully'
             }
 
-            # Fetch all entries from the database
-            entries = JournalEntry.objects.all()
+            # Check if LLM integration is enabled in settings
+            if getattr(settings, 'ENABLE_LLM_INTEGRATION', False):
+                # Fetch all entries from the database
+                entries = JournalEntry.objects.all()
 
-            # Extract content from each entry and create a list of content strings
-            content_list = [entry.content for entry in entries]
+                # Extract content from each entry and create a list of content strings
+                content_list = [entry.content for entry in entries]
 
-            # Prepare the data to send to the LLM
-            data_to_llm = {'entries': content_list}
+                # Prepare the data to send to the LLM
+                data_to_llm = {'entries': content_list}
 
-            # Replace 'https://your-llm-api-endpoint.com' with your actual LLM endpoint
-            llm_endpoint = 'https://your-llm-api-endpoint.com'
+                # Replace 'https://your-llm-api-endpoint.com' with your actual LLM endpoint
+                llm_endpoint = 'https://your-llm-api-endpoint.com'
 
-            # Send data to the LLM using requests.post
-            response = requests.post(llm_endpoint, json=data_to_llm)
+                # Send data to the LLM using requests.post
+                response = requests.post(llm_endpoint, json=data_to_llm)
 
-            # Process the response from the LLM as needed
-            if response.status_code == 200:
-                return JsonResponse({'success': 'Journal entry saved and content sent to LLM successfully'})
-            else:
-                return JsonResponse({'error': 'Failed to send content to LLM'}, status=response.status_code)
+                # Process the response from the LLM as needed
+                if response.status_code == 200:
+                    return JsonResponse({'success': 'Journal entry saved and content sent to LLM successfully'})
+                else:
+                    return JsonResponse({'error': 'Failed to send content to LLM'}, status=response.status_code)
+
+            # If LLM integration is not enabled, return a success response without LLM integration
+            return JsonResponse({'success': 'Journal entry saved successfully'})
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON in the request'}, status=400)
