@@ -1,13 +1,12 @@
-pandas
+-f https://download.pytorch.org/whl/torch_stable.html
+torch==1.13.0+cpu
 openai
 pydantic
 tiktoken
 boto3
-yaml
 s3fs
 python-dotenv
 pyYAML
-torch
-sentence_transformers
+sentence-transformers
 InstructorEmbedding
 nltk

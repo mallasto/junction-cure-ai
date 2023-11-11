@@ -3,7 +3,8 @@ import json
 
 journals = json.load(open('../../data/journals.json'))
 request = {
-    'entries': journals[1]['entries']
+    'entries': journals[2]['entries'],
+    'model': 'embedding'
 }
 
 result = app.handler(request)
