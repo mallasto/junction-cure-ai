@@ -37,40 +37,43 @@ def process_journal_entry(request):
                 'id': new_entry.id,
                 'success': 'Journal entry saved successfully'
             }
+            return JsonResponse(response_data)  # Wrap the dictionary in JsonResponse
 
-            # Check if LLM integration is enabled in settings
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({'error': 'Failed to send content to LLM'},)
 
-            # Fetch all entries from the database
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON in the request'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+@csrf_exempt
+def send_to_llm_and_get_response(request):
+    if request.method == 'POST':
+        try:
             entries = JournalEntry.objects.all()
-
-            # Extract content from each entry and create a list of content strings
             content_list = [entry.content for entry in entries]
 
-            # Prepare the data to send to the LLM
             data_to_llm = {'entries': content_list}
-            print(content_list)
 
-            # Replace 'https://your-llm-api-endpoint.com' with your actual LLM endpoint
             llm_endpoint = 'https://ij6j4fcx2khpnas4d33bfor4la0glwzd.lambda-url.eu-central-1.on.aws/'
-
-            # Send data to the LLM using requests.post
             response = send_post_request(llm_endpoint, data=data_to_llm)
 
-            # Process the response from the LLM as needed
             if response:
-                new_entry.patient_summary = response['patient']['summary']
-                new_entry.patient_feedback = response['patient']['feedback']
-                new_entry.therapist_summary = response['therapist']['actions']
-                new_entry.therapist_feedback = response['therapist']['symptoms']
-                new_entry.save()
-                return JsonResponse({'success': 'Journal entry saved and content sent to LLM successfully',"response": response})
+                # Process the LLM response and update the corresponding entries
+                for entry in entries:
+                    entry.patient_summary = response['patient']['summary']
+                    entry.patient_feedback = response['patient']['feedback']
+                    entry.therapist_summary = response['therapist']['actions']
+                    entry.therapist_feedback = response['therapist']['symptoms']
+                    entry.save()
+
+                return JsonResponse({'success': 'Content sent to LLM and entries updated successfully'})
             
             else:
-                print(response)
-                return JsonResponse({'error': 'Failed to send content to LLM'},)
-
-            # If LLM integration is not enabled, return a success response without LLM integration
-            return JsonResponse({'success': 'Journal entry saved successfully'})
+                return JsonResponse({'error': 'Failed to send content to LLM'})
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON in the request'}, status=400)
