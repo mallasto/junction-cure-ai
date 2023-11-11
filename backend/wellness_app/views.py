@@ -84,10 +84,10 @@ def get_all_entries(request):
             {'id': entry.id,
              'content': entry.content, 
              'timestamp': entry.timestamp, 
-             'patient summary': entry.patient_summary,
-             'patient feedback': entry.patient_feedback,
-             'therapist summary': entry.therapist_summary,
-             'therapist feedback': entry.therapist_feedback
+             'patient_summary': entry.patient_summary,
+             'patient_feedback': entry.patient_feedback,
+             'therapist_summary': entry.therapist_summary,
+             'therapist_feedback': entry.therapist_feedback
              }
             for entry in entries
         ]
@@ -102,10 +102,10 @@ def get_entry_by_id(request, id):
             'id': entry.id,
             'content': entry.content, 
             'timestamp': entry.timestamp, 
-            'patient summary': entry.patient_summary,
-            'patient feedback': entry.patient_feedback,
-            'therapist summary': entry.therapist_summary,
-            'therapist feedback': entry.therapist_feedback
+            'patient_summary': entry.patient_summary,
+            'patient_feedback': entry.patient_feedback,
+            'therapist_summary': entry.therapist_summary,
+            'therapist_feedback': entry.therapist_feedback
         }
         return JsonResponse({'entry': serialized_entry}, safe=False)
     except JournalEntry.DoesNotExist:
