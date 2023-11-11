@@ -1,38 +1,48 @@
-import openai
+import os
 import json
 import yaml
+
 from typing import List
 from pydantic import BaseModel, Field
+import asyncio
+import openai
 
-with open("./rubric.json", "r") as f:
-    RUBRIC = json.load(f)
+import utils
 
+from dotenv import load_dotenv
+load_dotenv()
 
-def format_rubric_string(rubric):
+import logging
+logging.basicConfig(level=logging.INFO, force=True)
+logger = logging.getLogger()
+
+openai_client = openai.AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
+
+def format_context_string(context, api_name):
     res = ""
-    for r in rubric:
-        res += f"### {r['name']}\n"
-        
-        res += f"Criteria:\n"
-        for c in r['criteria']:
-            res += f"\t{c}\n"
 
-        res += f"Examples:\n"
-        for c in r['examples']:
-            res += f"\t{c}\n"
-        res += "\n"
+    # THERAPIST
+    if api_name == 'therapist':
+        for c in context:
+            res += f"{c['name']}: {c['description']}\n"
+
+    # PATIENT
+    elif api_name == 'patient':
+        for c in context:
+            res += f"### {c['name']}\n"
+            
+            res += f"Criteria:\n"
+            for criteria in c['criteria']:
+                res += f"\t{criteria}\n"
+
+            res += f"Examples:\n"
+            for example in c['examples']:
+                res += f"\t{example}\n"
+            res += "\n"
     return res
 
-def format_symptom_string(symptoms):
-    res = ""
-    for s in symptoms:
-        res += f"{s['name']}: {s['description']}\n"
-    return res
-
-
-def format_system_message(symptoms, api_name):
-    if api_name == "symptoms":
-        symptom_string = format_symptom_string(symptoms)
+def format_system_message(input_str, api_name):
+    if api_name == "therapist":
         return f""" ## ROLE:You are an assistant to a therapist. 
 ## TASK: Your task is to read through entries from a patient's therapy journal.
 Below, you are provided with a list of symps of mental disorders and their descriptions. You should
@@ -45,10 +55,9 @@ respond with any symptoms matching with the journal.
 Please also describe what the user has been doing according to the journal.
 
 ## SYMPTOMS AND THEIR DESCRIPTIONS:
-{symptom_string}
+{input_str}
 """
-    elif api_name == "user_feedback":
-        rubric_str = format_rubric_string(RUBRIC)
+    elif api_name == "patient":
         return f""" ## ROLE:You are antropomorphic labradoodle working as a therapist's assistant to support people writing their therapy journals.
 You are happy, optimistic, understanding and caring. A perfect therapy dog! 
 ## TASK: Your task is to read through a patient's therapy journal and provided feedback based on the rubric below.
@@ -62,29 +71,29 @@ all criteria, only the ones you think are worth highlighting.
 Please also provide a summary of all the feedback.
 
 ## RUBRIC:
-{rubric_str}
+{input_str}
 """
 
 
 def format_user_message(entries, api_name):
     journal_str = ""
     
-    # SYMPTOMS
-    if api_name == 'symptoms':
+    # THERAPIST
+    if api_name == 'therapist':
         for i, entry in enumerate(entries):
             journal_str += f"Entry {i}: {entry}\n\n"
         return f""" ## THERAPY JOURNAL:
         {journal_str}
         """
-    # USER FEEDBACK
-    elif api_name == 'user_feedback':
+    # PATIENT
+    elif api_name == 'patient':
         return f" ## THERAPY JOURNAL:\n {entries[-1]}"
 
 def get_openai_function_api(api_name):
     schema = None
 
-    # SYMPTOMS
-    if api_name == "symptoms":
+    # THERAPIST
+    if api_name == "therapist":
         class ExcerptModel(BaseModel):
             "Output Schema for excerpts"
 
@@ -115,8 +124,8 @@ def get_openai_function_api(api_name):
             'api': output_api
         }
 
-    # USER FEEDBACK
-    elif api_name == "user_feedback":
+    # PATIENT
+    elif api_name == "patient":
         class FeedbackModel(BaseModel):
             "Output Schema for excerpts"
 
@@ -143,9 +152,8 @@ def get_openai_function_api(api_name):
 
     return schema
 
-def call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106", temperature=0):
-    
-    response = openai.chat.completions.create(
+async def async_call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106", temperature=0):
+    response = await openai_client.chat.completions.create(
         model=model,
         temperature=temperature,
         functions = [schema['api']],
@@ -158,3 +166,30 @@ def call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106"
     completion = response.choices[0].message
     result = json.loads(completion.function_call.arguments)
     return result
+
+
+async def get_openai_responses(request, api_names, contexts):
+    tasks = []
+    for context, api_name in zip(contexts, api_names):
+        context_str = format_context_string(context, api_name)
+        system_message = format_system_message(context_str, api_name)
+        user_message = format_user_message(request['entries'], api_name)
+        schema = get_openai_function_api(api_name)
+
+        logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(system_message)}\n{system_message}")
+        logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(user_message)}\n{user_message}")
+
+        task = async_call_openai(
+            user_message=user_message,
+            system_message=system_message,
+            schema=schema
+        )
+        tasks.append(task)
+
+    return await asyncio.gather(*tasks)
+
+def get_analysis(request, api_names, contexts):
+    coroutines = get_openai_responses(request, api_names, contexts)
+    loop = asyncio.get_event_loop()
+    results =  loop.run_until_complete(coroutines)
+    return {f"{api_name}": result for api_name, result in zip(api_names, results)}
