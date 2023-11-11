@@ -12,6 +12,16 @@ export async function postDiaryEntry(content: string) {
   })
 }
 
+
+export async function deleteEntry(id: string) {
+  return fetch(`${API}/wellness_app/entries/delete/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
 export async function getEntries() {
   try {
     const response = await fetch(`${API}/wellness_app/entries/all/`);

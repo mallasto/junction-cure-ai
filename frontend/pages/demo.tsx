@@ -2,9 +2,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { postDiaryEntry, getEntries, Entry, Patient, Therapist, Feedback } from '../pages/api/entry';
+import { postDiaryEntry, deleteEntry, getEntries, Entry, Patient, Therapist, Feedback } from '../pages/api/entry';
 import dayjs from 'dayjs';
-
+import { UserType } from "@/utils";
 
 const mockPatientFeedback: Patient = {
   "summary": "You're doing a great job of reflecting on your emotions and recognizing the need for reaching out for help. Keep exploring your feelings and consider taking small steps towards seeking support.",
@@ -217,11 +217,21 @@ export default function DemoPage() {
   const handleClickSymptom = (symptom: string) => {
     setCurrentSymptom(symptom);
   }
-  const DisorderPanel = ({therapistFeedback, currentSymptom}: {therapistFeedback: Therapist, currentSymptom: string | null}) =>  {
+
+  const handleDelete  = async (id: string) => {
+    try {
+      await deleteEntry(id);
+      await fetchEntries();
+    } catch(err) {
+      console.log('error', err);
+    }
+  } 
+  const DisorderPanel = ({therapistFeedback, currentSymptom}: {therapistFeedback: Therapist| null, currentSymptom: string | null}) =>  {
+    if (!therapistFeedback || user !== UserType.Therapist) return <div className="w-3/12 pr-4" />
     return (
       <div className="w-3/12 pr-4">
-        <h3 className="text-md font-bold">Action</h3>
-        <div className="rounded-md shadow-lg p-4 mb-2 bg-white">
+        <h3 className="text-xl font-bold">Action</h3>
+        <div className="mt-2 rounded-md shadow-lg p-4 mb-2 bg-white">
           {therapistFeedback.actions}
         </div>
         <h3 className="text-md font-bold">Symptoms</h3>
@@ -243,6 +253,7 @@ export default function DemoPage() {
   const EntryList = ({entries}: {entries: Entry[]}) => {
     return (
       <div className="w-9/12">
+          <h3 className="text-xl font-bold">Entries</h3>
           {entries.map((entry: Entry, index) => {
             let highlights: string[] = [];
             if (currentSymptom) {
@@ -253,7 +264,20 @@ export default function DemoPage() {
             return (
             <div key={index} className="bg-base-100 flex border-solid border-2 mt-2 rounded-sm">
               <div className="w-4/5 m-4">
+                <div className="flex justify-between">
                 <h2 className="card-title">{dayjs(entry.timestamp).format('DD/MM/YYYY hh:mm A')}</h2>
+                { isPatient && <div className="dropdown">
+                  <button className="btn btn-square">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                      </svg>
+                      </button>
+                      <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
+                        <li><button onClick={() => handleDelete(entry.id)}>Delete</button></li>
+                      </ul>
+                    </div>
+                }
+                </div>
                 <p><HighlightText value={entry.content} higlights={highlights} /></p>
               </div>
               <div className="border-l-4 border-indigo-500 w-2/5 p-2 ">
@@ -267,19 +291,19 @@ export default function DemoPage() {
       </div>
     )
   }
-  
+  const isPatient = user === UserType.Patient;
   return (
     <AnimatePresence>
         <div className="navbar bg-base-100 shadow-md flex justify-between sticky top-0 z-50">
           <a className="btn btn-ghost normal-case text-xl">labradoodle.ai</a>
           <div className="">
-            <button className="btn btn-primary right-4" onClick={() => openModal(true)}>Add Entry</button>
+            { isPatient &&  <button className="btn btn-primary right-4" onClick={() => openModal(true)}>Add Entry</button>}
             <span className="ml-4">{user || 'Login'}</span>
           </div>
         </div>
         <div className="pl-4 pr-4">
           <div className="w-full min-h-screen flex items-start mt-4">
-            {therapistFeedback && <DisorderPanel currentSymptom={currentSymptom} therapistFeedback={therapistFeedback}/> }
+            <DisorderPanel currentSymptom={currentSymptom} therapistFeedback={therapistFeedback}/>
             <EntryList entries={entries}/>
           </div>
         </div>
