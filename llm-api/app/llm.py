@@ -74,7 +74,7 @@ def get_openai_function_api(api_name):
             "Output Schema for excerpts"
 
             symptom: str = Field(..., description="Name of the symptom expressed in the journal entry")
-            excerpts: List[str] = Field(..., description="List of excerpts from the journal entry that you associate with a given symptom")
+            excerpts: List[str] = Field(..., description="List of exact excerpts from the journal entry that you associate with a given symptom")
             reason: str = Field(..., description="Reason for why the symptom can be concluded from the excerpts")
 
         class QueryModel(BaseModel):
@@ -98,7 +98,7 @@ def get_openai_function_api(api_name):
             "Output Schema for excerpts"
 
             criteria: str = Field(..., description="Name of the criteria for this feedback.")
-            excerpts: List[str] = Field(..., description="List of excerpts from the journal entry that you provide feedback to.")
+            excerpts: List[str] = Field(..., description="List of exact excerpts from the journal entry that you provide feedback to.")
             feedback: str = Field(..., description="Feedback on the specific criteria.")
 
         class QueryModel(BaseModel):
@@ -120,7 +120,8 @@ def get_openai_function_api(api_name):
     return schema
 
 def call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106", temperature=0):
-    completion = openai.ChatCompletion.create(
+    
+    response = openai.chat.completions.create(
         model=model,
         temperature=temperature,
         functions = [schema['api']],
@@ -128,7 +129,8 @@ def call_openai(user_message, system_message, schema, model="gpt-3.5-turbo-1106"
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message}
         ]
-    ).choices[0].message
-    print(completion)
-    result = json.loads(completion["function_call"]["arguments"])
-    return schema['model'].parse_json(result)
+    )
+    print("RESPONSE:", response)
+    completion = response.choices[0].message
+    return completion
+
