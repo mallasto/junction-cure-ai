@@ -8,11 +8,13 @@ import openai
 import utils
 import llm
 
+import pickle
+
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
 
-RUBRIC = json.load(open("assets/rubric.json"))
-SYMPTOMS = json.load(open('assets/symptoms.json'))
+RUBRIC = pickle.load(open("assets/rubric.pickle", "rb"))
+SYMPTOMS = pickle.load(open("assets/symptoms.pickle", "rb"))
 DISORDERS = json.load(open('assets/disorders.json'))
 
 def handler(event, context=None):
@@ -21,6 +23,6 @@ def handler(event, context=None):
     api_names = ['patient', 'therapist']
     contexts = [RUBRIC, SYMPTOMS]
     
-    result = llm.get_analysis(request, api_names, contexts)
+    result = llm.get_analysis(request, api_names, contexts, model='embedding')
     return result
     

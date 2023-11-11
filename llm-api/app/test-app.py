@@ -3,7 +3,7 @@ import json
 
 journals = json.load(open('../../data/journals.json'))
 request = {
-    'entries': journals[0]['entries']
+    'entries': journals[1]['entries']
 }
 
 result = app.handler(request)
