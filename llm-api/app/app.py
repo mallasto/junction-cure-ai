@@ -27,6 +27,9 @@ def handler(event, context=None):
     user_message = llm.format_user_message(request['entries'])
     schema = llm.get_openai_function_api('symptoms')
 
+    logger.info(f"SYSTEM MESSAGE:\n Tokens: {utils.num_tokens_from_string(system_message)}\n{system_message}")
+    logger.info(f"USER MESSAGE:\n Tokens: {utils.num_tokens_from_string(user_message)}\n{user_message}")
+
     result = llm.call_openai(
         user_message=user_message,
         system_message=system_message,
