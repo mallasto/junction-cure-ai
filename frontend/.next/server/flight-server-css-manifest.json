@@ -1,5 +1,6 @@
 {
   "cssImports": {
+<<<<<<< HEAD
     "/Users/zhuoyanzhu/Code/junction-cure-ai/frontend/app/layout.tsx": [
       "/Users/zhuoyanzhu/Code/junction-cure-ai/frontend/styles/globals.css"
     ]
@@ -7,6 +8,15 @@
   "cssModules": {
     "/Users/zhuoyanzhu/Code/junction-cure-ai/frontend/app/page": [
       "/Users/zhuoyanzhu/Code/junction-cure-ai/frontend/styles/globals.css"
+=======
+    "C:\\Users\\bador\\Desktop\\junction-cure-ai\\frontend\\app\\layout.tsx": [
+      "C:\\Users\\bador\\Desktop\\junction-cure-ai\\frontend\\styles\\globals.css"
+    ]
+  },
+  "cssModules": {
+    "C:\\Users\\bador\\Desktop\\junction-cure-ai\\frontend\\app\\page": [
+      "C:\\Users\\bador\\Desktop\\junction-cure-ai\\frontend\\styles\\globals.css"
+>>>>>>> bca188dba98859b8c96055e280116c2734053b83
     ]
   }
 }

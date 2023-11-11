@@ -14,8 +14,7 @@ print('Embed symptoms')
 def add_symptom_embeddings(symptoms):
     for i, symptom in tqdm(enumerate(symptoms)):
         symptom['embedding'] = embedding_utils.embed_query(
-            query=symptom['description'],
-            instruction="Represent the Science sentence:"
+            query=symptom['description']
         )
         symptoms[i] = symptom
     return symptoms
@@ -25,8 +24,7 @@ def add_rubric_embeddings(rubric):
     for i, element in tqdm(enumerate(rubric)):
         sentences = [f"Agrees with the criteria: {c}" for c in element['criteria']]
         element['embedding'] = embedding_utils.embed_sentences(
-            sentences=sentences,
-            instruction="Represent the Science sentence:"
+            sentences=sentences
         )
         rubric[i] = element
     return rubric

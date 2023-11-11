@@ -13,10 +13,6 @@ import utils
 from dotenv import load_dotenv
 load_dotenv()
 
-import logging
-logging.basicConfig(level=logging.INFO, force=True)
-logger = logging.getLogger()
-
 def format_context_string(context, api_name):
     res = ""
 
@@ -159,8 +155,6 @@ def get_analysis(request, api_names, contexts, model='openai'):
                 results[api_name] =  embedding_utils.score_rubric(request['entries'][-1], context, top_n=3)
             elif api_name == 'therapist':
                 results[api_name] =  embedding_utils.score_symptoms(request['entries'], context, top_n=3)
-        print('RESULTS:')
-        print(results)
         return results
     else:
         input_openai = {api_name: {} for api_name in api_names}
