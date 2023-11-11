@@ -23,6 +23,6 @@ def handler(event, context=None):
     api_names = ['patient', 'therapist']
     contexts = [RUBRIC, SYMPTOMS]
     
-    result = llm.get_analysis(request, api_names, contexts, model='embedding')
+    result = llm.get_analysis(request, api_names, contexts, model=request['model'])
     return result
     
