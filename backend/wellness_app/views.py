@@ -63,12 +63,12 @@ def send_to_llm_and_get_response(request):
 
             if response:
                 # Process the LLM response and update the corresponding entries
-                for entry in entries:
-                    entry.patient_summary = response['patient']['summary']
-                    entry.patient_feedback = response['patient']['feedback']
-                    entry.therapist_summary = response['therapist']['actions']
-                    entry.therapist_feedback = response['therapist']['symptoms']
-                    entry.save()
+                entry = entries[-1]
+                entry.patient_summary = response['patient']['summary']
+                entry.patient_feedback = response['patient']['feedback']
+                entry.therapist_summary = response['therapist']['actions']
+                entry.therapist_feedback = response['therapist']['symptoms']
+                entry.save()
 
                 return JsonResponse({'success': 'Content sent to LLM and entries updated successfully'})
             
