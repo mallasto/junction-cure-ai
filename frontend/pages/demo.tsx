@@ -51,7 +51,7 @@ const UnderlineText = ({ feedback, value }: {
           const feedbackItem = feedback.find((f) => f.excerpt?.toLowerCase() === part?.toLowerCase());
           function TipContent() {
             return (
-              <div className="">
+              <div className="w-72">
                 <div className="badge badge-primary font-bold text-white mr-2 rounded-sm">{feedbackItem?.criteria}</div>
                 <span>{feedbackItem?.feedback}</span>
               </div>
