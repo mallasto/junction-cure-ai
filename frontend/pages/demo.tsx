@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { UserType } from "@/utils";
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
-import { uuid } from "uuidv4";
+import { v4 } from "uuid";
 
 const HighlightText = ({ higlights, value }: {
   higlights: string[];
@@ -23,11 +23,11 @@ const HighlightText = ({ higlights, value }: {
         {parts.map((part, index) => {
           const higlightItem = higlights.find((f) => f?.toLowerCase() === part?.toLowerCase());
           return higlightItem ? (
-            <span key={index} className="bg-yellow-200">
+            <span key={`${part}-${index}`} className="bg-yellow-200">
               {part}
             </span>
           ) : (
-            <span key={index}>{part}</span>
+            <span key={`${part}-${index}`}>{part}</span>
           )
         })}
       </span>
@@ -43,6 +43,7 @@ const UnderlineText = ({ feedback, value }: {
   const getFeedbackText = (text:string, feedback: PatientFeedback[]) => {
     if (!feedback || !feedback.length) return (<React.Fragment>{text}</React.Fragment>)
     // Split on higlights and render hightlighted parts
+    debugger
     const regex = new RegExp(feedback.map(i => `(${i.excerpt})`).join('|'), 'gi');
     const parts = text.split(regex);
     return (
@@ -57,10 +58,10 @@ const UnderlineText = ({ feedback, value }: {
               </div>
             )
           }
-          const id = uuid();
+          const id = v4();
           return feedbackItem ? (
-            <div key={part}>
-              <span data-tooltip-id={id} key={index} data-tooltip-target="tooltip-bottom" data-tooltip-placement="right" className="border-b-2 border-primary">
+            <div key={id}>
+              <span data-tooltip-id={id} data-tooltip-target="tooltip-bottom" data-tooltip-placement="right" className="border-b-2 border-primary">
                 {part}
               </span>
               <Tooltip
@@ -70,7 +71,7 @@ const UnderlineText = ({ feedback, value }: {
               />
             </div>
         ): (
-            <span key={index}>{part}</span>
+            <span key={id}>{part}</span>
           )
         })}
       </span>
@@ -90,6 +91,10 @@ export default function DemoPage() {
   
   useEffect(() => {
     const user = localStorage.getItem("user-type");
+    if (!user) {
+      // Redirect to home page
+      window.location.href = "/";
+    }
     setUser(user);
     fetchEntries();
   }, []);
@@ -170,7 +175,7 @@ export default function DemoPage() {
     return (
       <div className="w-9/12">
         <div className="flex">
-          <h3 className="text-xl w-4/5 font-bold"></h3>
+          <div className="w-4/5 flex justify-end items-end">{ isPatient && <button className="btn btn-primary btn-sm mr-4 rounded-md shadow-lg" onClick={() => openModal()}>Add</button>}</div>
           <div className="w-2/5 flex items-center">
             <div className="avatar justify-start">
               <div className="w-10 rounded-full ring ring-base-100 ring-offset-base-100">
@@ -195,8 +200,8 @@ export default function DemoPage() {
                 <h2 className="card-title">{dayjs(entry.timestamp).format('DD/MM/YYYY hh:mm A')}</h2>
                 { isPatient && <div className="dropdown">
                         <label tabIndex={0} className="w-6 h-6">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className= "w-6 h-6 p-0">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className= "w-6 h-6 p-0">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
                           </svg>
                         </label>
                       <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
@@ -209,11 +214,13 @@ export default function DemoPage() {
                   <UnderlineText value={entry.content} feedback={entry.patient_feedback} /> 
                   : <HighlightText value={entry.content} higlights={highlights} />}</p>
               </div>
-              {entry.patient_summary ? <div className="self-start border-l-4 border-indigo-500 w-2/5 p-2 mt-4 bg-base-100 ">
+              {<div className="self-start border-l-4 border-indigo-500 w-2/5 p-2 mt-4 bg-base-100 ">
+                {entry.patient_summary  ?
                 <p className="font-normal w-full text-md">
                   {entry.patient_summary}
-                </p> 
-              </div> : <div className="w-2/5 p-2 " />
+                </p> : <p className="flex items-center"><span className="loading loading-dots loading-md mr-4"/> I am thinking</p>
+               }
+              </div> 
               }
             </div>
             )}
@@ -223,7 +230,7 @@ export default function DemoPage() {
   }
   const isPatient = user === UserType.Patient;
   return (
-    <AnimatePresence>
+    <div>
         <div className="navbar bg-base-100 shadow-md flex justify-between sticky top-0 z-50">
           <div className="ml-4">
           <div className="avatar">
@@ -234,8 +241,7 @@ export default function DemoPage() {
           </div>
           </div>
           <div className="">
-            { isPatient &&  <button className="btn btn-primary right-4" onClick={() => openModal()}>Add Entry</button>}
-            <span className="ml-4">{user || 'Login'}</span>
+            <span className="mr-4">{user || 'Login'}</span>
           </div>
         </div>
         <div className="pl-4 pr-4">
@@ -244,27 +250,27 @@ export default function DemoPage() {
             <EntryList entries={entries}/>
           </div>
         </div>
-        <dialog id="add_modal" className="modal" modal-open>
+        <dialog id="add_modal" className="modal">
           <div className="modal-box">
             <form method="dialog">
               <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
-            <h3 className="font-bold text-lg">Add new journal</h3>
-            <div className="space-y-6">
+            <h3 className="font-bold text-lg mt-4">Add your journal</h3>
+            <div className="space-y-6 mt-2">
               <div className="mb-4">
                 <textarea 
                   rows={6}
-                  className="textarea textarea-bordered w-full" 
+                  className="textarea textarea-bordered w-full leading-5" 
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Bio"></textarea>
+                  placeholder="How are you feeling overall? (e.g., physical sensations, mental state)"></textarea>
               </div>
               <div className="flex justify-end">
-                <button className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+                <button className="btn btn-primary siz rounded-md" onClick={handleSubmit}>Submit</button>
               </div>
             </div>
           </div>
         </dialog>
-    </AnimatePresence>
+    </div>
   );
 }

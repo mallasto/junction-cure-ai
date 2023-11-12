@@ -42,7 +42,7 @@ export default function Home() {
             className="relative md:ml-[-10px] md:mb-[37px] font-extrabold text-[16vw] md:text-[130px] font-inter text-[#1E2B3A] leading-[0.9] tracking-[-2px] z-[100]"
           
           >
-            <span className="text-[#FF0000]">Labradoodle.ai</span> <br />
+            <span className="text-5xl mb-72 text-orange-600">Labradoodle.ai</span> <br />
             Self Care <br />
             is getting <span className="text-[#407BBF]">POWER</span>
             <span className="font-inter text-[#407BBF]">.</span>  
@@ -64,8 +64,7 @@ export default function Home() {
                 Platform
               </h2>
               <p className="text-[14px] leading-[20px] text-[#1a2b3b] font-normal">
-                Full access to our platform, including all questions and
-                solutions.
+                Elevate Your Health Experience with Our Intelligent Medical Journal Platform.
               </p>
             </div>
             <div className="w-1/2">
@@ -73,8 +72,7 @@ export default function Home() {
                 Community
               </h2>
               <p className="text-[14px] leading-[20px] text-[#1a2b3b] font-normal">
-                Join a community of like-minded individuals, and learn from each
-                other.
+                Connect with your healthcare team through our secure communication features for personalized care.
               </p>
             </div>
           </motion.div>
@@ -133,14 +131,14 @@ export default function Home() {
               }}
             >
               <Link
-                onClick={() => setUser(UserType.Therapist)}
+                onClick={() => setUser(UserType.Patient)}
                 href="/demo"
                 className="group rounded-full px-4 py-2 text-[13px] font-semibold transition-all flex items-center justify-center bg-[#f5f7f9] text-[#1E2B3A] no-underline active:scale-95 scale-100 duration-75"
                 style={{
                   boxShadow: "0 1px 1px #0c192714, 0 1px 3px #0c192724",
                 }}
               >
-                <span className="mr-2"> Try it as THERAPIST </span>
+                <span className="mr-2"> Try it as PATIENT </span>
 
                 <svg
                   className="w-5 h-5"
@@ -175,14 +173,14 @@ export default function Home() {
               }}
             >
               <Link
-                onClick={() => setUser(UserType.Patient)}
+                onClick={() => setUser(UserType.Therapist)}
                 href="/demo"
                 className="group rounded-full px-4 py-2 text-[13px] font-semibold transition-all flex items-center justify-center bg-[#f5f7f9] text-[#1E2B3A] no-underline active:scale-95 scale-100 duration-75"
                 style={{
                   boxShadow: "0 1px 1px #0c192714, 0 1px 3px #0c192724",
                 }}
               >
-                <span className="mr-2"> Try it as PATIENT </span>
+                <span className="mr-2"> Try it as THERAPIST </span>
 
                 <svg
                   className="w-5 h-5"
