@@ -30,9 +30,9 @@ For the therapist, we have `GPT4` generated lists of
 * `assets/symptoms.sjon` symptoms of mental health disorders and their descriptions
 * `assets/disorders.json` mental health disorders and their associated symptoms.
 We cross-reference the symptom descriptions against all user entries. If a symptom is found, we return
-    - Name of the symptom (e.g., `Apathy`)
-    - Reasons supporting the presence of the symptom (only with the `LLM` model)
-    - List of excerpts from the entries related to the symptom
+* Name of the symptom (e.g., `Apathy`)
+* Reasons supporting the presence of the symptom (only with the `LLM` model)
+* List of excerpts from the entries related to the symptom
 
 ### Output
 The application responds with the following schema:
