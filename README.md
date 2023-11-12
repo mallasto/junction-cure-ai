@@ -1,8 +1,13 @@
 # Labradoodle.ai
 An Encouraging Therapy Journal
 
-## Problem
+## Introduction
 Documenting your journey towards a better mental place is tough. With the use of a large language model (LLM) powered therapy journal, we wish to encourage the patient to document their process and experiences and improve the information exchange to the healthcare experts. On one hand, this is done by providing the users with feedback to improve the way they process their experiences with the journal. On the other hand, we help the experts by providing insights on the patients' writing.
+
+### Demo Videos
+[Landing Page](https://drive.google.com/file/d/1gBFoX3P1g-bjT9KU8apr1vPkgozYEkx6/view?usp=sharing)
+[Patient View](https://drive.google.com/file/d/17UKtu1MBV-c65NLOha7J4LiTh5Eiubc3/view?usp=sharing)
+[Therapist View](https://drive.google.com/file/d/10hTJ40iFYqY08NAf-x9LU2gAqawQ5_aT/view?usp=sharing)
 
 
 ## Real-World Impact
@@ -27,9 +32,3 @@ The journey is just beginning, and the future holds exciting possibilities:
 * **Actionable Recommendations.** Lower the patients' threshold to take actions towards their improved well-being by providing actionable recommendations based on their data and preferences. 
 * **Integration with Wearables.** Stay better informed of the patients' journey by integrating with popular health wearables, allowing users to seamlessly incorporate data from devices like fitness trackers and smartwatches into their records.
 * **Population-Level Insights.** Help professionals research therapeutic journals by processing the structured data gathered by our intelligent platforms. Find out the effectiveness of treatment plans through the insights parsed  from thousands of patient journals.
-
-
-### Demo Videos
-[Landing Page](https://drive.google.com/file/d/1gBFoX3P1g-bjT9KU8apr1vPkgozYEkx6/view?usp=sharing)
-[Patient View](https://drive.google.com/file/d/17UKtu1MBV-c65NLOha7J4LiTh5Eiubc3/view?usp=sharing)
-[Therapist View](https://drive.google.com/file/d/10hTJ40iFYqY08NAf-x9LU2gAqawQ5_aT/view?usp=sharing)
