@@ -131,8 +131,8 @@ def get_openai_function_api(api_name):
         class QueryModel(BaseModel):
             "Output Schema for writing feedback for therapy journals"
 
-            summary: str = Field(..., description="A positive and encouraging summary of the feedback. At most 50 words.")
             feedback: List[FeedbackModel]
+            summary: str = Field(..., description="A positive and encouraging summary of the provided feedback. At most 20 words.")
 
         output_schema = QueryModel.schema()
         output_api = {
