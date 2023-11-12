@@ -193,7 +193,7 @@ class MiniGl {
                       `\nconst int ${name}_length = ${uniform.value.length};`
                     );
                   } else {
-                    return `uniform ${uniform.value[0].type} ${name}[${uniform.value.length}];`;
+                    return `uniform ${uniform.value[0]?.type} ${name}[${uniform.value.length}];`;
                   }
                 if ("struct" === uniform.type) {
                   let name_no_prefix = name.replace("u_", "");

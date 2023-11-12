@@ -12,6 +12,14 @@ export async function postDiaryEntry(content: string) {
   })
 }
 
+export async function triggerAnalysis() {
+  return fetch(`${API}/wellness_app/entries/analyse/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
 
 export async function deleteEntry(id: string) {
   return fetch(`${API}/wellness_app/entries/delete/${id}`, {
@@ -81,7 +89,7 @@ export interface Feedback {
   feedback: string
 }
 
-export interface TherapistR {
+export interface TherapistResult {
   actions: string
   symptoms: Symptom[]
 }
