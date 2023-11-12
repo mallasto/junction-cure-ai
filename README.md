@@ -1,4 +1,4 @@
-![Labradoodle](https://drive.google.com/file/d/13oiQDVleW3y-sAdTuyMX_e5E75CNEp2f/view?usp=sharing)
+![Labradoodle](https://drive.google.com/uc?export=download&id=13oiQDVleW3y-sAdTuyMX_e5E75CNEp2f)
 # Labradoodle.ai
 An Encouraging Therapy Journal - Our submission to Junction 2023 Outokumpu challenge [Suistainable Generative AI Assistant for Insights](https://www.junction2023.com/challenges-2023/outokumpu).
 
