@@ -1,7 +1,7 @@
 # Labradoodle.ai
 An Encouraging Therapy Journal
 
-## Introduction
+## Introduction ([Pitch Deck](https://docs.google.com/presentation/d/1GSXJbAbC8VFl8alTRruNBAQBYbGp7PMDTsvAoTTGzUc/edit#slide=id.g29a13a3cc43_0_13))
 Documenting your journey towards a better mental place is tough. With the use of a large language model (LLM) powered therapy journal, we wish to encourage the patient to document their process and experiences and improve the information exchange to the healthcare experts. On one hand, this is done by providing the users with feedback to improve the way they process their experiences with the journal. On the other hand, we help the experts by providing insights on the patients' writing.
 
 ### Demo Videos
