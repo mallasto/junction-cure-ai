@@ -25,7 +25,7 @@ An alternative would have been to look into smaller [open-source LLMs](https://h
 * We are not aware of API calling fine-tuned open-source LLMs  for structured output.
 * Fine-tuning our own model was out of scope for this project, but with more time and resources would definitely be a possibility.
 
-See more in our [github](https://github.com/mallasto/junction-cure-ai/tree/main/llm-api/app)!
+We deploy our model as an API endpoint, see here for [details](https://github.com/mallasto/junction-cure-ai/tree/main/llm-api/app) and here for an [example response](https://github.com/mallasto/junction-cure-ai/blob/main/llm-api/app/result.json).
 
 ## Future Possibilities
 The journey is just beginning, and the future holds exciting possibilities:
