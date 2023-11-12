@@ -43,7 +43,6 @@ const UnderlineText = ({ feedback, value }: {
   const getFeedbackText = (text:string, feedback: PatientFeedback[]) => {
     if (!feedback || !feedback.length) return (<React.Fragment>{text}</React.Fragment>)
     // Split on higlights and render hightlighted parts
-    debugger
     const regex = new RegExp(feedback.map(i => `(${i.excerpt})`).join('|'), 'gi');
     const parts = text.split(regex);
     return (
