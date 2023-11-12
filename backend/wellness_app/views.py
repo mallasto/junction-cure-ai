@@ -63,7 +63,7 @@ def send_to_llm_and_get_response(request):
 
             if response:
                 # Process the LLM response and update the corresponding entries
-                entry = JournalEntry.objects.order_by('id').first()
+                entry = JournalEntry.objects.order_by('id').last()
                 entry.patient_summary = response['patient']['summary']
                 entry.patient_feedback = response['patient']['feedback']
                 entry.therapist_summary = response['therapist']['actions']
